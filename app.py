@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 from scipy.stats import norm
 import plotly.graph_objects as go
+from streamlit import cache_data
 
 st.set_page_config(page_title="Option Pricing Dashboard", layout="wide")
 
@@ -154,23 +155,31 @@ cols[2].metric("Vega", f"{greeks.vega():.4f}")
 cols[3].metric("Theta", f"{greeks.theta():.4f}")
 cols[4].metric("Rho", f"{greeks.rho():.4f}")
 
-#Generate Surface Grids 
-spot_vals = np.linspace(spot_min, spot_max, 40)
-vol_vals = np.linspace(vol_min, vol_max, 40)
-spot_grid, vol_grid = np.meshgrid(spot_vals, vol_vals)
+@st.cache_data(show_spinner=True)
+def compute_surface_grids(T, K, r, N, option_type, option_style, spot_min, spot_max, vol_min, vol_max):
+    spot_vals = np.linspace(spot_min, spot_max, 40)
+    vol_vals = np.linspace(vol_min, vol_max, 40)
+    spot_grid, vol_grid = np.meshgrid(spot_vals, vol_vals)
 
-bs_grid = np.zeros_like(spot_grid)
-bin_grid = np.zeros_like(spot_grid)
-tri_grid = np.zeros_like(spot_grid)
+    bs_grid = np.zeros_like(spot_grid)
+    bin_grid = np.zeros_like(spot_grid)
+    tri_grid = np.zeros_like(spot_grid)
 
-for i in range(spot_grid.shape[0]):
-    for j in range(spot_grid.shape[1]):
-        s_val = spot_grid[i, j]
-        vol_val = vol_grid[i, j]
+    for i in range(spot_grid.shape[0]):
+        for j in range(spot_grid.shape[1]):
+            s_val = spot_grid[i, j]
+            vol_val = vol_grid[i, j]
 
-        bs_grid[i, j] = BlackScholes(T, s_val, K, r, vol_val, option_type).price()
-        bin_grid[i, j] = Binomial(T, s_val, K, r, vol_val, N, option_type).price(option_style)
-        tri_grid[i, j] = Trinomial(T, s_val, K, r, vol_val, N, option_type).price(option_style)
+            bs_grid[i, j] = BlackScholes(T, s_val, K, r, vol_val, option_type).price()
+            bin_grid[i, j] = Binomial(T, s_val, K, r, vol_val, N, option_type).price(option_style)
+            tri_grid[i, j] = Trinomial(T, s_val, K, r, vol_val, N, option_type).price(option_style)
+
+    return spot_vals, vol_vals, bs_grid, bin_grid, tri_grid
+
+# Call the cached function
+spot_vals, vol_vals, bs_grid, bin_grid, tri_grid = compute_surface_grids(
+    T, K, r, N, option_type, option_style, spot_min, spot_max, vol_min, vol_max
+)
 
 #Plotly Heatmap 
 def plotly_heatmap(z, x, y, title, current_spot, current_vol):
@@ -212,3 +221,5 @@ def plotly_heatmap(z, x, y, title, current_spot, current_vol):
 st.plotly_chart(plotly_heatmap(bs_grid, spot_vals, vol_vals, f"Black-Scholes {option_style} {option_type}", S, sigma), use_container_width=True)
 st.plotly_chart(plotly_heatmap(bin_grid, spot_vals, vol_vals, f"Binomial {option_style} {option_type}", S, sigma), use_container_width=True)
 st.plotly_chart(plotly_heatmap(tri_grid, spot_vals, vol_vals, f"Trinomial {option_style} {option_type}", S, sigma), use_container_width=True)
+
+'streamlit run "/Users/mitpatel/Desktop/Projects/Vanilla Option Pricing/app.py"'
