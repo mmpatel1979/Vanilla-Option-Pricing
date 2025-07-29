@@ -221,5 +221,3 @@ def plotly_heatmap(z, x, y, title, current_spot, current_vol):
 st.plotly_chart(plotly_heatmap(bs_grid, spot_vals, vol_vals, f"Black-Scholes {option_style} {option_type}", S, sigma), use_container_width=True)
 st.plotly_chart(plotly_heatmap(bin_grid, spot_vals, vol_vals, f"Binomial {option_style} {option_type}", S, sigma), use_container_width=True)
 st.plotly_chart(plotly_heatmap(tri_grid, spot_vals, vol_vals, f"Trinomial {option_style} {option_type}", S, sigma), use_container_width=True)
-
-'streamlit run "/Users/mitpatel/Desktop/Projects/Vanilla Option Pricing/app.py"'
