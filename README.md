@@ -1,3 +1,3 @@
-# Vanilla-Option-Pricing
+# Vanilla-Option-Pricing-Dashboard
 
-https://vanilla-option-pricing.streamlit.app/
+https://vanilla-option-pricing-dashboard.streamlit.app/
